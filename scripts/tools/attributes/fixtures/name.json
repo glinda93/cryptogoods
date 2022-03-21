@@ -1,0 +1,62 @@
+[
+  {
+    "value": "T-Shirt",
+    "rarity": 100
+  },
+  {
+    "value": "Sweater",
+    "rarity": 100
+  },
+  {
+    "value": "Jacket",
+    "rarity": 100
+  },
+  {
+    "value": "Coat",
+    "rarity": 100
+  },
+  {
+    "value": "Jeans",
+    "rarity": 100
+  },
+  {
+    "value": "Socks",
+    "rarity": 100
+  },
+  {
+    "value": "Shorts",
+    "rarity": 100
+  },
+  {
+    "value": "Tracksuit",
+    "rarity": 100
+  },
+  {
+    "value": "Vest",
+    "rarity": 100
+  },
+  {
+    "value": "Pajamas",
+    "rarity": 100
+  },
+  {
+    "value": "Shoes",
+    "rarity": 100
+  },
+  {
+    "value": "Boots",
+    "rarity": 100
+  },
+  {
+    "value": "Raincoat",
+    "rarity": 100
+  },
+  {
+    "value": "Tanktop",
+    "rarity": 100
+  },
+  {
+    "value": "Swimsuit",
+    "rarity": 100
+  }
+]
