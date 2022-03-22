@@ -69,7 +69,7 @@ describe("CryptoGoods", function () {
     it("should prevent presale mint when the market is not opened", async function () {
       await expect(
         CryptoGoodsToken.connect(addr1).mintAtPresale(1)
-      ).to.be.revertedWith("Market is not opened at presale now");
+      ).to.be.revertedWith("Market is not presale");
     });
 
     it("Should allow owner to set market status", async function () {
@@ -157,7 +157,7 @@ describe("CryptoGoods", function () {
         CryptoGoodsToken.connect(whiteList1).mintAtPresale(numberToMint, {
           value: presalePrice.mul(numberToMint),
         })
-      ).to.be.revertedWith("You exceeded max available to purchase");
+      ).to.be.revertedWith("Exceed max whitelist available");
 
       numberToMint = randomInt(1, NUM_WHITELIST_AVAILABLE_TOKEN - 1);
 
@@ -177,7 +177,7 @@ describe("CryptoGoods", function () {
       numberToMint = NUM_WHITELIST_AVAILABLE_TOKEN - numberToMint + 1;
       await expect(
         CryptoGoodsToken.connect(whiteList1).mintAtPresale(numberToMint)
-      ).to.be.revertedWith("You exceeded max available to purchase");
+      ).to.be.revertedWith("Exceed max whitelist available");
     });
 
     it("should not exceed presale total supply", async function () {
@@ -229,12 +229,12 @@ describe("CryptoGoods", function () {
         CryptoGoodsToken.connect(whiteList1).mintAtPresale(1, {
           value: presalePrice,
         })
-      ).to.be.revertedWith("Market is not opened at presale now");
+      ).to.be.revertedWith("Market is not presale");
       await expect(
         CryptoGoodsToken.connect(addr1).mintAtPresale(1, {
           value: presalePrice,
         })
-      ).to.be.revertedWith("Market is not opened at presale now");
+      ).to.be.revertedWith("Market is not presale");
       await expect(
         CryptoGoodsToken.connect(addr1).mint({
           value: presalePrice,
