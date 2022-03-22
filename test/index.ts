@@ -1,10 +1,9 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
-import { ethers, waffle } from "hardhat";
+import { ethers } from "hardhat";
+// eslint-disable-next-line node/no-missing-import
 import { randomInt } from "../helpers/random";
-
-const provider = waffle.provider;
 
 describe("CryptoGoods", function () {
   enum MarketStatus {
@@ -14,15 +13,13 @@ describe("CryptoGoods", function () {
     GIVEAWAY,
   }
 
-  const MAX_TOTAL_SUPPLY = 3333;
+  // const MAX_TOTAL_SUPPLY = 3333;
   const MAX_PRESALE_SUPPLY = 1250;
-  const MAX_SALE_SUPPLY = 1833;
+  // const MAX_SALE_SUPPLY = 1833;
 
   let CryptoGoodsToken: Contract;
   let owner: SignerWithAddress;
   let addr1: SignerWithAddress;
-  let addr2: SignerWithAddress;
-  let addr3: SignerWithAddress;
 
   let whiteList1: SignerWithAddress;
   let whiteList2: SignerWithAddress;
@@ -42,7 +39,7 @@ describe("CryptoGoods", function () {
 
   const contractDeploy = async () => {
     const CryptoGoodsFactory = await ethers.getContractFactory("CryptoGoods");
-    [owner, addr1, addr2, addr3, whiteList1, whiteList2, ...addrs] =
+    [owner, addr1, whiteList1, whiteList2, ...addrs] =
       await ethers.getSigners();
 
     CryptoGoodsToken = await CryptoGoodsFactory.deploy(
