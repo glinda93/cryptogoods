@@ -1,8 +1,10 @@
 {
-  "name": "hardhat-typescript-template",
+  "name": "cryptogoods",
   "version": "0.1.0",
-  "description": "Hardhat Typescript template",
-  "main": "index.js",
+  "description": "Cryptogoods",
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "scripts": {
     "deploy": "hardhat run --network localhost scripts/deploy.ts",
     "node": "hardhat node",
