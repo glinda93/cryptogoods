@@ -1,7 +1,6 @@
 import yargs from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
-import { CryptoGoodsMetadata } from "../../types/CryptoGoodsAttribute";
-import { pickByRarity } from "./utils/random";
+import { CryptoGoodsMetadata } from "../../../types/CryptoGoodsAttribute";
 import names from "./fixtures/name.json";
 import sizes from "./fixtures/size.json";
 import colors from "./fixtures/color.json";
@@ -11,6 +10,7 @@ import { isEqual } from "lodash";
 import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
+import { pickByRarity } from "../../../helpers/random";
 
 dotenv.config();
 
