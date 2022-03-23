@@ -12,7 +12,7 @@
     "test:light": "hardhat test",
     "test": "hardhat coverage",
     "lint": "eslint '**/*.{js,ts}' && solhint contracts/**/*.sol && prettier '**/*.{json,sol,md}' --check",
-    "lint:fix": "eslint '**/*.{js,ts}' --fix; solhint contracts/**/*.sol --fix; prettier '**/*.{json,sol,md}' --write"
+    "lint:fix": "npx eslint '**/*.{js,ts}' --fix && npx prettier '**/*.{json,sol,md}' --write && npx solhint contracts/**/*.sol --fix;"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +21,7 @@
     "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-etherscan": "^3.0.1",
     "@nomiclabs/hardhat-waffle": "^2.0.2",
+    "@openzeppelin/contracts": "^4.5.0",
     "@typechain/ethers-v5": "^7.2.0",
     "@typechain/hardhat": "^2.3.1",
     "@types/chai": "^4.3.0",
