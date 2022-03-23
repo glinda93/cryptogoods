@@ -18,11 +18,19 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
         GIVEAWAY
     }
 
+    // Certain NFTs can mint and receive ERC20 Tokens per month
     uint256[] private _mintableTokenIds;
+
+    // Mapping from whitelist address to their presale limit
     mapping(address => uint8) private _whiteList;
+
+    // Mapping from market status to price
     mapping(MarketStatus => uint256) private _marketPrices;
 
+    // Current Market Status (None: Not opened, Presale)
     MarketStatus public currentMarketStatus;
+
+    // Current Mint price
     uint256 public currentPrice;
 
     uint256 public constant MAX_TOTAL_SUPPLY = 3333;
@@ -32,6 +40,9 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
     string public constant BASE_URI =
         "https://opensea-creatures-api.herokuapp.com/api/creature/";
 
+    /**
+     * @dev Should initialize with market prices per status
+     */
     constructor(MarketStatus[] memory statuses, uint256[] memory prices)
         ERC721("CryptoGoods NFT", "CG")
     {
@@ -47,6 +58,9 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
         currentMarketStatus = MarketStatus.NONE;
     }
 
+    /**
+     * @dev owner can set market status manually
+     */
     function setCurrentMarketStatus(MarketStatus marketStatus)
         external
         onlyOwner
@@ -55,7 +69,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
     }
 
     /**
-     * @dev set current nft market status (whitelist, presale, sale)
+     * @dev set current nft market status with prices (whitelist, presale, sale)
      * owner can manually change status
      */
     function setCurrentMarketStatusWithPrice(
@@ -65,6 +79,9 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
         _setCurrentMarketStatusWithPrice(marketStatus, price);
     }
 
+    /**
+     * @dev owner can set whitelist addresses with limit
+     */
     function setWhiteList(address[] calldata addresses, uint8 numAllowedToMint)
         external
         onlyOwner
@@ -74,16 +91,25 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
         }
     }
 
+    /**
+     * @dev whitelist user's current available presale limit
+     * This limit is set by `setWhiteList`
+     */
     function getOwnerPresaleAvailableToken() public view returns (uint256) {
         return _whiteList[_msgSender()];
     }
 
+    /**
+     * @dev current total supply
+     */
     function totalSupply() public view returns (uint256) {
         return _currentTokenIds.current() - 1;
     }
 
     /**
      * @dev mint at sale, giveaway status
+     * if market status is presale, it delegates to mintAtPresale
+     * users can mint only one at a time
      */
     function mint() public payable {
         require(
@@ -93,13 +119,14 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
         if (currentMarketStatus == MarketStatus.PRESALE) {
             mintAtPresale(1);
         } else {
-            require(currentPrice <= msg.value, "Ether is not enough");
+            require(msg.value >= currentPrice, "Ether is not enough");
             _mintTo(_msgSender());
         }
     }
 
     /**
      * @dev mint to the whitelist accounts at presale
+     * whitelist users can mint in bulk, but should not exceed their presale limit
      */
     function mintAtPresale(uint8 numberOfTokens) public payable {
         require(
@@ -128,6 +155,9 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
         _whiteList[_msgSender()] -= numberOfTokens;
     }
 
+    /**
+     * @dev withdraw balance from contract to me
+     */
     function withdraw() public onlyOwner {
         uint256 balance = address(this).balance;
         // solhint-disable-next-line
@@ -135,6 +165,11 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
         require(sent, "Failed to withdraw ether");
     }
 
+    /**
+     * @dev set current market status with price
+     * current status and price is set by this function
+     * If the price is 0, then current price is set _marketPrices, which is defined at the constructor
+     */
     function _setCurrentMarketStatusWithPrice(
         MarketStatus marketStatus,
         uint256 price
@@ -147,6 +182,13 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
         }
     }
 
+    /**
+     * @dev mint
+     * increase the token id tracker
+     * check the market status transition
+     * if the total supply reaches the presale limit, it should be changed into sale status
+     * if the total supply reaches the sale limit, it should be changed into giveaway status
+     */
     function _mintTo(address to) internal returns (uint256) {
         uint256 newTokenId = _currentTokenIds.current();
         _currentTokenIds.increment();
@@ -155,6 +197,10 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
         return newTokenId;
     }
 
+    /**
+     * @dev responsible for state transition checking
+     * change the status and current price, if the transition condition is satisfied
+     */
     function _stateTransition() internal {
         uint256 ts = totalSupply();
         if (
