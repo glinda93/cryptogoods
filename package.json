@@ -9,6 +9,7 @@
     "deploy": "hardhat run --network localhost scripts/deploy.ts",
     "node": "hardhat node",
     "build": "hardhat compile",
+    "attr": "ts-node scripts/tools/attributes/generate.ts",
     "test:light": "hardhat test",
     "test": "hardhat coverage",
     "lint": "eslint '**/*.{js,ts}' && solhint contracts/**/*.sol && prettier '**/*.{json,sol,md}' --check",
