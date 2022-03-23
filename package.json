@@ -12,7 +12,7 @@
     "test:light": "hardhat test",
     "test": "hardhat coverage",
     "lint": "eslint '**/*.{js,ts}' && solhint contracts/**/*.sol && prettier '**/*.{json,sol,md}' --check",
-    "lint:fix": "npx eslint '**/*.{js,ts}' --fix && npx solhint contracts/**/*.sol --fix && npx prettier '**/*.{json,sol,md}' --write;"
+    "lint:fix": "npx eslint '**/*.{js,ts}' --fix && npx prettier '**/*.{json,sol,md}' --write && npx solhint contracts/**/*.sol --fix;"
   },
   "keywords": [],
   "author": "",

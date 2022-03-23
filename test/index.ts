@@ -254,8 +254,8 @@ describe("CryptoGoods", function () {
       const finalCgToken = await CryptoGoodsToken.balanceOf(addr1.address);
       expect(finalCgToken.sub(initialCgToken)).to.be.equal(1);
     });
+    // TODO: stress test (mint 1833 test to test state transitio)
     // it("should be changed into giveaway status", async function() {
-
     // });
   });
 });

@@ -51,18 +51,18 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
         external
         onlyOwner
     {
-        _setCurrentMarketWithPrice(marketStatus, 0);
+        _setCurrentMarketStatusWithPrice(marketStatus, 0);
     }
 
     /**
      * @dev set current nft market status (whitelist, presale, sale)
      * owner can manually change status
      */
-    function setCurrentMarketWithPrice(MarketStatus marketStatus, uint256 price)
-        external
-        onlyOwner
-    {
-        _setCurrentMarketWithPrice(marketStatus, price);
+    function setCurrentMarketStatusWithPrice(
+        MarketStatus marketStatus,
+        uint256 price
+    ) external onlyOwner {
+        _setCurrentMarketStatusWithPrice(marketStatus, price);
     }
 
     function setWhiteList(address[] calldata addresses, uint8 numAllowedToMint)
@@ -75,7 +75,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
     }
 
     function getOwnerPresaleAvailableToken() public view returns (uint256) {
-        return _whiteList[msg.sender];
+        return _whiteList[_msgSender()];
     }
 
     function totalSupply() public view returns (uint256) {
@@ -94,7 +94,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
             mintAtPresale(1);
         } else {
             require(currentPrice <= msg.value, "Ether is not enough");
-            _mintTo(msg.sender);
+            _mintTo(_msgSender());
         }
     }
 
@@ -106,38 +106,36 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
             currentMarketStatus == MarketStatus.PRESALE,
             "Market is not presale"
         );
-        require(_whiteList[msg.sender] > 0, "You are not allowed");
+        require(_whiteList[_msgSender()] > 0, "You are not allowed");
         require(
-            _whiteList[msg.sender] >= numberOfTokens,
+            _whiteList[_msgSender()] >= numberOfTokens,
             "Exceed max whitelist available"
         );
 
         uint256 ts = totalSupply();
         require(
             ts + numberOfTokens <= MAX_PRESALE_SUPPLY,
-            "Purchase would exeed max tokens"
+            "Purchase would exceed max tokens"
         );
         require(
             currentPrice * numberOfTokens <= msg.value,
             "Ether is not enough"
         );
         for (uint8 i = 0; i < numberOfTokens; i++) {
-            uint256 tokenId = _mintTo(msg.sender);
+            uint256 tokenId = _mintTo(_msgSender());
             _setTokenURI(tokenId, string(abi.encodePacked(BASE_URI, tokenId)));
         }
-        _whiteList[msg.sender] -= numberOfTokens;
+        _whiteList[_msgSender()] -= numberOfTokens;
     }
 
-    function withdraw() public onlyOwner returns (bool) {
+    function withdraw() public onlyOwner {
         uint256 balance = address(this).balance;
-        if (payable(msg.sender).send(balance)) {
-            return true;
-        } else {
-            return false;
-        }
+        // solhint-disable-next-line
+        bool sent = payable(_msgSender()).send(balance);
+        require(sent, "Failed to withdraw ether");
     }
 
-    function _setCurrentMarketWithPrice(
+    function _setCurrentMarketStatusWithPrice(
         MarketStatus marketStatus,
         uint256 price
     ) internal {
@@ -164,7 +162,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
             ts >= MAX_PRESALE_SUPPLY
         ) {
             currentMarketStatus = MarketStatus.SALE;
-            _setCurrentMarketWithPrice(
+            _setCurrentMarketStatusWithPrice(
                 currentMarketStatus,
                 _marketPrices[currentMarketStatus]
             );
@@ -174,7 +172,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
             ts >= MAX_PRESALE_SUPPLY + MAX_SALE_SUPPLY
         ) {
             currentMarketStatus = MarketStatus.GIVEAWAY;
-            _setCurrentMarketWithPrice(
+            _setCurrentMarketStatusWithPrice(
                 currentMarketStatus,
                 _marketPrices[currentMarketStatus]
             );
