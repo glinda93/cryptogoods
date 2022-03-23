@@ -1,0 +1,22 @@
+[
+  {
+    "value": 1,
+    "rarity": 64
+  },
+  {
+    "value": 2,
+    "rarity": 20
+  },
+  {
+    "value": 3,
+    "rarity": 10
+  },
+  {
+    "value": 4,
+    "rarity": 5
+  },
+  {
+    "value": 5,
+    "rarity": 1
+  }
+]
