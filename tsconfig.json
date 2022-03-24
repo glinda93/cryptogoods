@@ -6,8 +6,12 @@
     "esModuleInterop": true,
     "outDir": "dist",
     "declaration": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "typeRoots": ["node_modules/@types", "@types"]
   },
   "include": ["./scripts", "./test", "./typechain", "types"],
-  "files": ["./hardhat.config.ts"]
+  "files": ["./hardhat.config.ts"],
+  "ts-node": {
+    "files": true
+  }
 }
