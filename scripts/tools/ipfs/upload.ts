@@ -37,12 +37,14 @@ const IPFS_METADATA_PATH = `${IPFS_ROOT_PATH}/metadata`;
 
   const ipfs = await IPFS.create();
 
-  await ipfs.files.mkdir(IPFS_ROOT_PATH);
+  await ipfs.files.mkdir(IPFS_ROOT_PATH, {
+    parents: true,
+  });
   await ipfs.files.mkdir(IPFS_IMAGE_PATH);
   await ipfs.files.mkdir(IPFS_METADATA_PATH);
 
   let count = 0;
-  for (const attribute of attributes.slice(0, 10)) {
+  for (const attribute of attributes) {
     const tokenId = count + 1;
     const imagePath = path.join(IMAGES_DIR, `${tokenId}.png`);
     if (!fs.existsSync(imagePath)) {
