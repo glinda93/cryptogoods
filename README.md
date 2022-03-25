@@ -1,4 +1,5 @@
 ![CI status](https://github.com/glinda93/hardhat-typescript-template/actions/workflows/main.yml/badge.svg)
+[![codecov](https://codecov.io/gh/glinda93/cryptogoods/branch/master/graph/badge.svg?token=5KE4XI2B0R)](https://codecov.io/gh/glinda93/cryptogoods)
 
 # About
 
