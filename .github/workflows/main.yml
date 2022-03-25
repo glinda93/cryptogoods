@@ -38,3 +38,10 @@ jobs:
       - run: npm test
       - run: npm run node &
       - run: npm run deploy
+      - name: Upload coverage
+        uses: codecov/codecov-action@v2
+        with:
+          files: ./coverage/coverage-final.json
+          name: codecov-final
+          fail_ci_if_error: true
+          verbose: true
