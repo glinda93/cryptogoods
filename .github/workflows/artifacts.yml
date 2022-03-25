@@ -28,6 +28,7 @@ jobs:
       - run: npm run build
       - run: npm run tool:attr
       - run: npm run tool:image
+      - run: npm run tool:ipfs
       - name: Archive contract ABI
         uses: actions/upload-artifact@v3
         with:
