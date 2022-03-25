@@ -28,7 +28,10 @@ jobs:
       - run: npm run build
       - run: npm run tool:attr
       - run: npm run tool:image
-      - run: npm run tool:ipfs
+      - name: Upload to IPFS
+        env:
+          NODE_OPTIONS: "--max-old-space-size=8192"
+        run: npm run tool:ipfs
       - name: Archive contract ABI
         uses: actions/upload-artifact@v3
         with:
