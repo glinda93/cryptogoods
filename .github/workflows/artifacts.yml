@@ -1,6 +1,4 @@
-# This is a basic workflow to help you get started with Actions
-
-name: CI
+name: Artifacts
 
 # Controls when the workflow will run
 on:
@@ -16,7 +14,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  artifact:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -32,9 +30,27 @@ jobs:
           node-version: 16.x
       # install dependencies using clean install to avoid package lock updates
       - run: npm ci
-      - run: npm run lint
+      - run: cp .env.example .env
       - run: npm run build
-      # run the tests
-      - run: npm test
-      - run: npm run node &
-      - run: npm run deploy
+      - run: npm run tool:attr
+      - run: npm run tool:image
+      - name: Archive contract ABI
+        uses: actions/upload-artifact@v3
+        with:
+          name: ABI
+          path: |
+            artifacts
+      - name: Archive NFT metadata attributes
+        uses: actions/upload-artifact@v3
+        with:
+          name: Metadata
+          path: |
+            scripts/tools/attributes/output
+            !scripts/tools/attributes/output/.gitignore
+      - name: Archive images
+        uses: actions/upload-artifact@v3
+        with:
+          name: Images
+          path: |
+            scripts/tools/images/output
+            !scripts/tools/images/output/.gitignore
