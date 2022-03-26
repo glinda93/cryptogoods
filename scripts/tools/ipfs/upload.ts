@@ -5,7 +5,6 @@ import fs from "fs";
 import yargs from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
 import { CryptoGoodsMetadata } from "../../../types/CryptoGoodsAttribute";
-import _ from "lodash";
 
 dotenv.config();
 
@@ -131,16 +130,16 @@ if (!process.env.NFT_MARKET_CAP) {
     }
   }
 
-  const stat = await ipfs.files.stat(IPFS_METADATA_PATH);
-  const uris = _.range(0, count).map((_val, idx) => {
-    const tokenId = s + idx + 1;
-    return `https://ipfs.io/ipfs/${stat.cid}${IPFS_METADATA_PATH}/${tokenId}.json`;
-  });
+  // const stat = await ipfs.files.stat(IPFS_METADATA_PATH);
+  // const uris = _.range(0, count).map((_val, idx) => {
+  //   const tokenId = s + idx + 1;
+  //   return `https://ipfs.io/ipfs/${stat.cid}${IPFS_METADATA_PATH}/${tokenId}.json`;
+  // });
 
-  fs.writeFileSync(
-    path.join(OUTPUT_DIR, `tokenURIs_${s}_${e}.txt`),
-    uris.join("\n")
-  );
+  // fs.writeFileSync(
+  //   path.join(OUTPUT_DIR, `tokenURIs_${s}_${e}.txt`),
+  //   uris.join("\n")
+  // );
 
   // eslint-disable-next-line no-process-exit
   process.exit(0);
