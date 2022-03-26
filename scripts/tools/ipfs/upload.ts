@@ -2,6 +2,8 @@ import * as IPFS from "ipfs-core";
 import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
+import yargs from "yargs/yargs";
+import { hideBin } from "yargs/helpers";
 import { CryptoGoodsMetadata } from "../../../types/CryptoGoodsAttribute";
 import _ from "lodash";
 
@@ -19,13 +21,37 @@ const IPFS_ROOT_PATH = `/CryptoGoods/${new Date().getTime()}`;
 const IPFS_IMAGE_PATH = `${IPFS_ROOT_PATH}/images`;
 const IPFS_METADATA_PATH = `${IPFS_ROOT_PATH}/metadata`;
 
+if (!process.env.NFT_MARKET_CAP) {
+  throw new Error("NFT_MARKET_CAP env variable is not set");
+}
+
 (async function () {
+  const argv = await yargs(hideBin(process.argv)).argv;
+  let s: number;
+  let e: number;
+  ({ s, e } = argv as any);
+  s = Number(s);
+  e = Number(e);
+  if (!s || Number.isNaN(s)) {
+    s = 0;
+  }
+  if (!e || Number.isNaN(e)) {
+    e = parseInt(process.env.NFT_MARKET_CAP!);
+  }
+
+  if (e < s) {
+    throw new Error(`End index ${e} must not be lower than start index ${s}`);
+  }
+
+  console.log(`Processing from ${s} to ${e}`);
+
   if (!fs.existsSync(ATTRIBUTES_FILE)) {
     throw new Error(
       "Attributes are not generated. Use 'npm run tool:attr' to generate"
     );
   }
-  const attributes: CryptoGoodsMetadata[] = JSON.parse(
+
+  let attributes: CryptoGoodsMetadata[] = JSON.parse(
     fs.readFileSync(ATTRIBUTES_FILE).toString()
   );
 
@@ -34,6 +60,8 @@ const IPFS_METADATA_PATH = `${IPFS_ROOT_PATH}/metadata`;
   if (!totalCount) {
     throw new Error("No metadata found");
   }
+
+  attributes = attributes.slice(s, e);
 
   const ipfs = await IPFS.create();
 
@@ -45,7 +73,7 @@ const IPFS_METADATA_PATH = `${IPFS_ROOT_PATH}/metadata`;
 
   let count = 0;
   for (const attribute of attributes) {
-    const tokenId = count + 1;
+    const tokenId = s + count + 1;
     const imagePath = path.join(IMAGES_DIR, `${tokenId}.png`);
     if (!fs.existsSync(imagePath)) {
       throw new Error(`Image not found: ${imagePath}`);
@@ -98,18 +126,22 @@ const IPFS_METADATA_PATH = `${IPFS_ROOT_PATH}/metadata`;
     fs.writeFileSync(path.join(OUTPUT_DIR, `${tokenId}.json`), json);
 
     count++;
-    if (count && count % 100 === 0) {
+    if (count && count % 10 === 0) {
       console.log(`Processed ${count} attributes`);
     }
   }
 
   const stat = await ipfs.files.stat(IPFS_METADATA_PATH);
   const uris = _.range(0, count).map((_val, idx) => {
-    const tokenId = idx + 1;
+    const tokenId = s + idx + 1;
     return `https://ipfs.io/ipfs/${stat.cid}${IPFS_METADATA_PATH}/${tokenId}.json`;
   });
 
-  fs.writeFileSync(path.join(OUTPUT_DIR, "urls.txt"), uris.join("\n"));
+  fs.writeFileSync(
+    path.join(OUTPUT_DIR, `tokenURIs_${s}_${e}.txt`),
+    uris.join("\n")
+  );
 
-  await ipfs.stop();
+  // eslint-disable-next-line no-process-exit
+  process.exit(0);
 })();

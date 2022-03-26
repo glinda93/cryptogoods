@@ -1,61 +1,99 @@
 name: Artifacts
 
-# Controls when the workflow will run
 on:
-  # Allows you to run this workflow manually from the Actions tab
+  push:
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  artifact:
-    # The type of runner that the job will run on
+  metadata:
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      # installing Node
+
       - name: Use Node.js 16.x
         uses: actions/setup-node@v1
         with:
-          # this will use the latest Node 16 version
           node-version: 16.x
-      # install dependencies using clean install to avoid package lock updates
+
       - run: npm ci
+
       - run: cp .env.example .env
+
       - run: npm run build
+
       - run: npm run tool:attr
+
       - run: npm run tool:image
-      - name: Upload to IPFS
-        env:
-          NODE_OPTIONS: "--max-old-space-size=8192"
-        run: npm run tool:ipfs
+
       - name: Archive contract ABI
         uses: actions/upload-artifact@v3
         with:
-          name: ABI
+          name: artifacts_abi
           path: |
             artifacts
-      - name: Archive NFT metadata attributes
+
+      - name: Archive NFT metadata
         uses: actions/upload-artifact@v3
         with:
-          name: Metadata
+          name: artifacts_metadata
           path: |
             scripts/tools/attributes/output
             !scripts/tools/attributes/output/.gitignore
+
       - name: Archive images
         uses: actions/upload-artifact@v3
         with:
-          name: Images
+          name: artifacts_images
           path: |
             scripts/tools/images/output
             !scripts/tools/images/output/.gitignore
+
+  ipfs:
+    needs: metadata
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        start: [0, 400, 800, 1200, 1600, 2000, 2400, 2800, 3200]
+        chunk: [400]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - run: npm ci
+
+      - run: cp .env.example .env
+
+      - name: Download NFT metadata
+        uses: actions/download-artifact@v3
+        with:
+          name: artifacts_metadata
+          path: scripts/tools/attributes/output
+
+      - name: Download NFT images
+        uses: actions/download-artifact@v3
+        with:
+          name: artifacts_images
+          path: scripts/tools/images/output
+
+      - name: Upload to IPFS
+        env:
+          NODE_OPTIONS: "--max-old-space-size=8192"
+          START: ${{matrix.start}}
+          CHUNK: ${{matrix.chunk}}
+        run: npm run tool:ipfs -- -s $START -e $(($START + $CHUNK))
+
       - name: Archive Token URIs
         uses: actions/upload-artifact@v3
         with:
-          name: TokenURIs
+          name: artifacts_token_uris_${{matrix.start}}
           path: |
             scripts/tools/ipfs/output
             !scripts/tools/ipfs/output/.gitignore

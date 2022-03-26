@@ -46,7 +46,7 @@ function generateImage(id: number, attribute: CryptoGoodsMetadata) {
   const attributes = readAttributes();
   let count = 0;
   for (const attribute of attributes) {
-    await generateImage(count, attribute);
+    await generateImage(count + 1, attribute);
     count += 1;
     if (count && count % 100 === 0) {
       console.log(`Generated ${count} images`);
