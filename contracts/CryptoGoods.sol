@@ -38,8 +38,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
     uint256 public constant MAX_PRESALE_SUPPLY = 1250;
     uint256 public constant MAX_SALE_SUPPLY = 1833;
 
-    string public constant BASE_URI =
-        "https://opensea-creatures-api.herokuapp.com/api/creature/";
+    string public baseTokenUri;
 
     /**
      * @dev Should initialize with market prices per status
@@ -47,13 +46,15 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
     constructor(
         MarketStatus[] memory statuses,
         uint256[] memory prices,
-        uint256[] memory mintableTokenIds
+        uint256[] memory mintableTokenIds,
+        string memory _baseTokenUri
     ) ERC721("CryptoGoods NFT", "CG") {
         require(
             statuses.length == prices.length,
             "Ensure price list are correct"
         );
         require(statuses.length == 3, "Prices should be set");
+        baseTokenUri = _baseTokenUri;
         _currentTokenIds.increment();
         for (uint8 i = 0; i < statuses.length; i++) {
             _marketPrices[statuses[i]] = prices[i];
@@ -169,7 +170,10 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
         );
         for (uint8 i = 0; i < numberOfTokens; i++) {
             uint256 tokenId = _mintTo(_msgSender());
-            _setTokenURI(tokenId, string(abi.encodePacked(BASE_URI, tokenId)));
+            _setTokenURI(
+                tokenId,
+                string(abi.encodePacked(baseTokenUri, tokenId, ".json"))
+            );
         }
         _whiteList[_msgSender()] -= numberOfTokens;
     }

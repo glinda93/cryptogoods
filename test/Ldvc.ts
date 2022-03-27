@@ -31,6 +31,8 @@ describe("Ldvc", function () {
   const LdvcTokenSymbol = "LDVC";
   const monthlyIncome = 30;
 
+  const baseTokenUri = "https://ldvc.com/";
+
   const contractDeploy = async () => {
     const CryptoGoodsFactory = await ethers.getContractFactory("CryptoGoods");
     const LdvcTokenFactory = await ethers.getContractFactory("Ldvc");
@@ -40,7 +42,8 @@ describe("Ldvc", function () {
     CryptoGoodsToken = await CryptoGoodsFactory.deploy(
       [MarketStatus.PRESALE, MarketStatus.SALE, MarketStatus.GIVEAWAY],
       [presalePrice, salePrice, giveawayPrice],
-      mintableTokenIds
+      mintableTokenIds,
+      baseTokenUri
     );
     await CryptoGoodsToken.deployed();
 
