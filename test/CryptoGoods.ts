@@ -4,6 +4,9 @@ import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 // eslint-disable-next-line node/no-missing-import
 import { randomInt } from "../helpers/random";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 describe("CryptoGoods", function () {
   enum MarketStatus {
@@ -31,7 +34,7 @@ describe("CryptoGoods", function () {
   const giveawayPrice = BigNumber.from("5000000000000000");
 
   const mintableTokenIds = [1, 2, 3];
-  const baseTokenUri = process.env.BASE_TOKEN_URI;
+  const baseTokenUri = process.env.BASE_TOKEN_URI || "";
 
   const initializeContract = async () => {
     await CryptoGoodsToken.setWhiteList(
@@ -44,12 +47,13 @@ describe("CryptoGoods", function () {
     const CryptoGoodsFactory = await ethers.getContractFactory("CryptoGoods");
     [owner, addr1, whiteList1, whiteList2, ...addrs] =
       await ethers.getSigners();
+    expect(baseTokenUri).to.not.equal("");
 
     CryptoGoodsToken = await CryptoGoodsFactory.deploy(
       [MarketStatus.PRESALE, MarketStatus.SALE, MarketStatus.GIVEAWAY],
       [presalePrice, salePrice, giveawayPrice],
       mintableTokenIds,
-      baseTokenUri
+      baseTokenUri!
     );
     await CryptoGoodsToken.deployed();
   };

@@ -2,6 +2,9 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 describe("Ldvc", function () {
   enum MarketStatus {
@@ -31,13 +34,15 @@ describe("Ldvc", function () {
   const LdvcTokenSymbol = "LDVC";
   const monthlyIncome = 30;
 
-  const baseTokenUri = process.env.BASE_TOKEN_URI;
+  const baseTokenUri = process.env.BASE_TOKEN_URI || "";
 
   const contractDeploy = async () => {
     const CryptoGoodsFactory = await ethers.getContractFactory("CryptoGoods");
     const LdvcTokenFactory = await ethers.getContractFactory("Ldvc");
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     [owner, addr1, addr2] = await ethers.getSigners();
+
+    expect(baseTokenUri).to.not.equal("");
 
     CryptoGoodsToken = await CryptoGoodsFactory.deploy(
       [MarketStatus.PRESALE, MarketStatus.SALE, MarketStatus.GIVEAWAY],
