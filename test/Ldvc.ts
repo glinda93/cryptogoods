@@ -29,7 +29,7 @@ describe("Ldvc", function () {
 
   const LdvcTokenName = "Ldvc Token";
   const LdvcTokenSymbol = "LDVC";
-  const cgSalary = 30;
+  const monthlyIncome = 30;
 
   const contractDeploy = async () => {
     const CryptoGoodsFactory = await ethers.getContractFactory("CryptoGoods");
@@ -48,7 +48,7 @@ describe("Ldvc", function () {
       LdvcTokenName,
       LdvcTokenSymbol,
       CryptoGoodsToken.address,
-      cgSalary
+      monthlyIncome
     );
     await LdvcToken.deployed();
   };
@@ -67,25 +67,25 @@ describe("Ldvc", function () {
     it("should allow claim ldvc at first for mintable token owners", async function () {
       await CryptoGoodsToken.connect(addr1).mint({ value: salePrice });
       expect(await CryptoGoodsToken.balanceOf(addr1.address)).to.be.equal(1);
-      expect(await CryptoGoodsToken.mintableOfOwner(addr1.address)).to.be.equal(
-        1
-      );
+      expect(
+        await CryptoGoodsToken.mintableCountOfOwner(addr1.address)
+      ).to.be.equal(1);
 
       await LdvcToken.connect(addr1).claimToken();
       expect(await LdvcToken.balanceOf(addr1.address)).to.be.equal(
-        cgSalary * 1
+        monthlyIncome * 1
       );
     });
     it("should give salary propotional for the mintable token they have", async function () {
       await CryptoGoodsToken.connect(addr1).mint({ value: salePrice });
       await CryptoGoodsToken.connect(addr1).mint({ value: salePrice });
-      expect(await CryptoGoodsToken.mintableOfOwner(addr1.address)).to.be.equal(
-        2
-      );
+      expect(
+        await CryptoGoodsToken.mintableCountOfOwner(addr1.address)
+      ).to.be.equal(2);
 
       await LdvcToken.connect(addr1).claimToken();
       expect(await LdvcToken.balanceOf(addr1.address)).to.be.equal(
-        cgSalary * 2
+        monthlyIncome * 2
       );
     });
     it("should prevent salary for non-mintable token owner", async function () {
@@ -109,7 +109,7 @@ describe("Ldvc", function () {
       // prevent airdrop before a month
       await LdvcToken.connect(addr1).claimToken();
       expect(await LdvcToken.balanceOf(addr1.address)).to.be.equal(
-        cgSalary * 1
+        monthlyIncome * 1
       );
     });
 
@@ -125,7 +125,7 @@ describe("Ldvc", function () {
       await LdvcToken.connect(addr1).claimToken();
 
       expect(await LdvcToken.balanceOf(addr1.address)).to.be.equal(
-        cgSalary * 2
+        monthlyIncome * 2
       );
     });
   });

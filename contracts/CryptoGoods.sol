@@ -62,18 +62,18 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
         _mintableTokenIds = mintableTokenIds;
     }
 
-    function mintableOfOwner(address owner) public view returns (uint8) {
+    function mintableCountOfOwner(address owner) public view returns (uint8) {
         if (balanceOf(owner) == 0) return 0;
 
         uint256 mintableLen = _mintableTokenIds.length;
-        uint8 balance = 0;
+        uint8 count = 0;
         for (uint256 i = 0; i < mintableLen; i++) {
             if (!_exists(_mintableTokenIds[i])) break;
             if (ownerOf(_mintableTokenIds[i]) == owner) {
-                balance++;
+                count++;
             }
         }
-        return balance;
+        return count;
     }
 
     /**
