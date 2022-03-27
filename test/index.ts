@@ -1,10 +1,9 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
-import { ethers, waffle } from "hardhat";
+import { ethers } from "hardhat";
+// eslint-disable-next-line node/no-missing-import
 import { randomInt } from "../helpers/random";
-
-const provider = waffle.provider;
 
 describe("CryptoGoods", function () {
   enum MarketStatus {
@@ -14,15 +13,13 @@ describe("CryptoGoods", function () {
     GIVEAWAY,
   }
 
-  const MAX_TOTAL_SUPPLY = 3333;
+  // const MAX_TOTAL_SUPPLY = 3333;
   const MAX_PRESALE_SUPPLY = 1250;
-  const MAX_SALE_SUPPLY = 1833;
+  // const MAX_SALE_SUPPLY = 1833;
 
   let CryptoGoodsToken: Contract;
   let owner: SignerWithAddress;
   let addr1: SignerWithAddress;
-  let addr2: SignerWithAddress;
-  let addr3: SignerWithAddress;
 
   let whiteList1: SignerWithAddress;
   let whiteList2: SignerWithAddress;
@@ -42,7 +39,7 @@ describe("CryptoGoods", function () {
 
   const contractDeploy = async () => {
     const CryptoGoodsFactory = await ethers.getContractFactory("CryptoGoods");
-    [owner, addr1, addr2, addr3, whiteList1, whiteList2, ...addrs] =
+    [owner, addr1, whiteList1, whiteList2, ...addrs] =
       await ethers.getSigners();
 
     CryptoGoodsToken = await CryptoGoodsFactory.deploy(
@@ -56,11 +53,11 @@ describe("CryptoGoods", function () {
     await contractDeploy();
   });
 
-  describe("Deploy", function () {
-    it("Should set the right owner", async function () {
+  describe("when deployed first", function () {
+    it("should set the right owner", async function () {
       expect(await CryptoGoodsToken.owner()).to.equal(owner.address);
     });
-    it("First status should be none", async function () {
+    it("should be none status at first", async function () {
       const status = await CryptoGoodsToken.currentMarketStatus();
       expect(status).to.equal(MarketStatus.NONE);
     });
@@ -72,10 +69,10 @@ describe("CryptoGoods", function () {
     it("should prevent presale mint when the market is not opened", async function () {
       await expect(
         CryptoGoodsToken.connect(addr1).mintAtPresale(1)
-      ).to.be.revertedWith("Market is not opened at presale now");
+      ).to.be.revertedWith("Market is not presale");
     });
 
-    it("Should allow owner to set market status", async function () {
+    it("should allow owner to set market status", async function () {
       await initializeContract();
       await CryptoGoodsToken.setCurrentMarketStatus(MarketStatus.PRESALE);
       expect(await CryptoGoodsToken.currentPrice()).to.be.equal(presalePrice);
@@ -94,8 +91,8 @@ describe("CryptoGoods", function () {
     });
   });
 
-  describe("market is not opened", function () {
-    it("Should prevent normal user from setting whitelist", async function () {
+  describe("when the market is not opened", function () {
+    it("should prevent normal user from setting whitelist", async function () {
       expect(await CryptoGoodsToken.currentMarketStatus()).to.be.equal(
         MarketStatus.NONE
       );
@@ -118,7 +115,7 @@ describe("CryptoGoods", function () {
     });
   });
 
-  describe("market is in presale", function () {
+  describe("when the market is in presale status", function () {
     beforeEach(async function () {
       await initializeContract();
       await CryptoGoodsToken.setCurrentMarketStatus(MarketStatus.PRESALE);
@@ -134,7 +131,7 @@ describe("CryptoGoods", function () {
         CryptoGoodsToken.connect(addr1).mintAtPresale(5)
       ).to.be.revertedWith("You are not allowed");
     });
-    it("can be minted at presale price", async function () {
+    it("should be minted at presale price", async function () {
       await expect(
         CryptoGoodsToken.connect(whiteList1).mintAtPresale(5, {
           value: presalePrice.sub(1),
@@ -160,7 +157,7 @@ describe("CryptoGoods", function () {
         CryptoGoodsToken.connect(whiteList1).mintAtPresale(numberToMint, {
           value: presalePrice.mul(numberToMint),
         })
-      ).to.be.revertedWith("You exceeded max available to purchase");
+      ).to.be.revertedWith("Exceed max whitelist available");
 
       numberToMint = randomInt(1, NUM_WHITELIST_AVAILABLE_TOKEN - 1);
 
@@ -180,7 +177,7 @@ describe("CryptoGoods", function () {
       numberToMint = NUM_WHITELIST_AVAILABLE_TOKEN - numberToMint + 1;
       await expect(
         CryptoGoodsToken.connect(whiteList1).mintAtPresale(numberToMint)
-      ).to.be.revertedWith("You exceeded max available to purchase");
+      ).to.be.revertedWith("Exceed max whitelist available");
     });
 
     it("should not exceed presale total supply", async function () {
@@ -205,7 +202,7 @@ describe("CryptoGoods", function () {
         amount += NUM_WHITELIST_AVAILABLE_TOKEN;
         if (amount > MAX_PRESALE_SUPPLY) {
           await expect(tx).to.be.revertedWith(
-            "Purchase would exeed max tokens"
+            "Purchase would exceed max tokens"
           );
           const totalSupply = await CryptoGoodsToken.totalSupply();
           const redunAmount = MAX_PRESALE_SUPPLY - totalSupply;
@@ -222,7 +219,7 @@ describe("CryptoGoods", function () {
       }
     });
   });
-  describe("market is in sale", function () {
+  describe("when the market is in sale", function () {
     beforeEach(async function () {
       await initializeContract();
       await CryptoGoodsToken.setCurrentMarketStatus(MarketStatus.SALE);
@@ -232,12 +229,12 @@ describe("CryptoGoods", function () {
         CryptoGoodsToken.connect(whiteList1).mintAtPresale(1, {
           value: presalePrice,
         })
-      ).to.be.revertedWith("Market is not opened at presale now");
+      ).to.be.revertedWith("Market is not presale");
       await expect(
         CryptoGoodsToken.connect(addr1).mintAtPresale(1, {
           value: presalePrice,
         })
-      ).to.be.revertedWith("Market is not opened at presale now");
+      ).to.be.revertedWith("Market is not presale");
       await expect(
         CryptoGoodsToken.connect(addr1).mint({
           value: presalePrice,
@@ -257,8 +254,8 @@ describe("CryptoGoods", function () {
       const finalCgToken = await CryptoGoodsToken.balanceOf(addr1.address);
       expect(finalCgToken.sub(initialCgToken)).to.be.equal(1);
     });
+    // TODO: stress test (mint 1833 test to test state transitio)
     // it("should be changed into giveaway status", async function() {
-
     // });
   });
 });

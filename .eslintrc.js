@@ -20,5 +20,8 @@ module.exports = {
       "error",
       { ignores: ["modules"] },
     ],
+    "no-unused-vars": "off",
+    "node/no-missing-import": "off",
+    "@typescript-eslint/no-unused-vars": ["error"],
   },
 };

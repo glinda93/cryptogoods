@@ -1,16 +1,21 @@
 {
-  "name": "hardhat-typescript-template",
+  "name": "cryptogoods",
   "version": "0.1.0",
-  "description": "Hardhat Typescript template",
-  "main": "index.js",
+  "description": "Cryptogoods",
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "scripts": {
     "deploy": "hardhat run --network localhost scripts/deploy.ts",
     "node": "hardhat node",
     "build": "hardhat compile",
+    "tool:attr": "ts-node scripts/tools/attributes/generate.ts",
+    "tool:image": "ts-node scripts/tools/images/generate.ts",
+    "tool:ipfs": "ts-node scripts/tools/ipfs/upload.ts",
     "test:light": "hardhat test",
     "test": "hardhat coverage",
     "lint": "eslint '**/*.{js,ts}' && solhint contracts/**/*.sol && prettier '**/*.{json,sol,md}' --check",
-    "lint:fix": "eslint '**/*.{js,ts}' --fix; solhint contracts/**/*.sol --fix; prettier '**/*.{json,sol,md}' --write"
+    "lint:fix": "npx eslint '**/*.{js,ts}' --fix && npx prettier '**/*.{json,sol,md}' --write && npx solhint contracts/**/*.sol --fix;"
   },
   "keywords": [],
   "author": "",
@@ -19,11 +24,14 @@
     "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-etherscan": "^3.0.1",
     "@nomiclabs/hardhat-waffle": "^2.0.2",
+    "@openzeppelin/contracts": "^4.5.0",
     "@typechain/ethers-v5": "^7.2.0",
     "@typechain/hardhat": "^2.3.1",
     "@types/chai": "^4.3.0",
+    "@types/lodash": "^4.14.180",
     "@types/mocha": "^9.1.0",
     "@types/node": "^16.11.10",
+    "@types/yargs": "^17.0.10",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
     "chai": "^4.3.6",
@@ -39,13 +47,17 @@
     "ethers": "^5.5.4",
     "hardhat": "^2.8.4",
     "hardhat-gas-reporter": "^1.0.7",
+    "ipfs-core": "^0.14.1",
+    "lodash": "^4.17.21",
     "prettier": "^2.5.1",
     "prettier-plugin-solidity": "^1.0.0-beta.19",
     "solhint": "^3.3.7",
     "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.7.19",
+    "text2png": "^2.3.0",
     "ts-node": "^10.5.0",
     "typechain": "^5.2.0",
-    "typescript": "^4.5.5"
+    "typescript": "^4.5.5",
+    "yargs": "^17.4.0"
   }
 }

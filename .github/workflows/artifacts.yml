@@ -1,0 +1,99 @@
+name: Artifacts
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  metadata:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - run: npm ci
+
+      - run: cp .env.example .env
+
+      - run: npm run build
+
+      - run: npm run tool:attr
+
+      - run: npm run tool:image
+
+      - name: Archive contract ABI
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts_abi
+          path: |
+            artifacts
+
+      - name: Archive NFT metadata
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts_metadata
+          path: |
+            scripts/tools/attributes/output
+            !scripts/tools/attributes/output/.gitignore
+
+      - name: Archive images
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts_images
+          path: |
+            scripts/tools/images/output
+            !scripts/tools/images/output/.gitignore
+
+  ipfs:
+    needs: metadata
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        start: [0, 400, 800, 1200, 1600, 2000, 2400, 2800, 3200]
+        chunk: [400]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - run: npm ci
+
+      - run: cp .env.example .env
+
+      - name: Download NFT metadata
+        uses: actions/download-artifact@v3
+        with:
+          name: artifacts_metadata
+          path: scripts/tools/attributes/output
+
+      - name: Download NFT images
+        uses: actions/download-artifact@v3
+        with:
+          name: artifacts_images
+          path: scripts/tools/images/output
+
+      - name: Upload to IPFS
+        env:
+          NODE_OPTIONS: "--max-old-space-size=8192"
+          START: ${{matrix.start}}
+          CHUNK: ${{matrix.chunk}}
+        run: npm run tool:ipfs -- -s $START -e $(($START + $CHUNK))
+
+      - name: Archive Token URIs
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts_token_uris_${{matrix.start}}
+          path: |
+            scripts/tools/ipfs/output
+            !scripts/tools/ipfs/output/.gitignore
