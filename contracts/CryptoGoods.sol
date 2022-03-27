@@ -17,7 +17,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
     SALE,
     GIVEAWAY
   }
-
+  // MUST be ascending sorted id
   uint256[] private _mintableTokenIds;
   mapping(address => uint8) private _whiteList;
   mapping(MarketStatus => uint256) private _marketPrices;
@@ -32,9 +32,11 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
   string public constant _baseUri =
     "https://opensea-creatures-api.herokuapp.com/api/creature/";
 
-  constructor(MarketStatus[] memory statuses, uint256[] memory prices)
-    ERC721("CryptoGoods NFT", "CG")
-  {
+  constructor(
+    MarketStatus[] memory statuses,
+    uint256[] memory prices,
+    uint256[] memory mintableTokenIds
+  ) ERC721("CryptoGoods NFT", "CG") {
     require(statuses.length == prices.length, "Ensure price list are correct");
     require(
       statuses.length == 3,
@@ -45,6 +47,21 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
       _marketPrices[statuses[i]] = prices[i];
     }
     currentMarketStatus = MarketStatus.NONE;
+    _mintableTokenIds = mintableTokenIds;
+  }
+
+  function mintableOfOwner(address owner) public view returns (uint8) {
+    if (balanceOf(owner) == 0) return 0;
+
+    uint256 mintableLen = _mintableTokenIds.length;
+    uint8 balance = 0;
+    for (uint256 i = 0; i < mintableLen; i++) {
+      if (!_exists(_mintableTokenIds[i])) break;
+      if (ownerOf(_mintableTokenIds[i]) == owner) {
+        balance++;
+      }
+    }
+    return balance;
   }
 
   function setCurrentMarketStatus(MarketStatus marketStatus)
@@ -90,6 +107,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
       currentMarketStatus != MarketStatus.NONE,
       "Market is not opened yet"
     );
+    require(totalSupply() <= MAX_TOTAL_SUPPLY, "Market cap reached");
     if (currentMarketStatus == MarketStatus.PRESALE) {
       mintAtPresale(1);
     } else {
