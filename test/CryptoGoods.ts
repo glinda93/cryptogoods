@@ -30,6 +30,8 @@ describe("CryptoGoods", function () {
   const salePrice = BigNumber.from("20000000000000000");
   const giveawayPrice = BigNumber.from("5000000000000000");
 
+  const mintableTokenIds = [1, 2, 3];
+
   const initializeContract = async () => {
     await CryptoGoodsToken.setWhiteList(
       [whiteList1.address, whiteList2.address],
@@ -44,7 +46,8 @@ describe("CryptoGoods", function () {
 
     CryptoGoodsToken = await CryptoGoodsFactory.deploy(
       [MarketStatus.PRESALE, MarketStatus.SALE, MarketStatus.GIVEAWAY],
-      [presalePrice, salePrice, giveawayPrice]
+      [presalePrice, salePrice, giveawayPrice],
+      mintableTokenIds
     );
     await CryptoGoodsToken.deployed();
   };

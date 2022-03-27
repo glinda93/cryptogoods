@@ -19,6 +19,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
     }
 
     // Certain NFTs can mint and receive ERC20 Tokens per month
+    // MUST be ascending sorted id
     uint256[] private _mintableTokenIds;
 
     // Mapping from whitelist address to their presale limit
@@ -43,9 +44,11 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
     /**
      * @dev Should initialize with market prices per status
      */
-    constructor(MarketStatus[] memory statuses, uint256[] memory prices)
-        ERC721("CryptoGoods NFT", "CG")
-    {
+    constructor(
+        MarketStatus[] memory statuses,
+        uint256[] memory prices,
+        uint256[] memory mintableTokenIds
+    ) ERC721("CryptoGoods NFT", "CG") {
         require(
             statuses.length == prices.length,
             "Ensure price list are correct"
@@ -56,6 +59,21 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
             _marketPrices[statuses[i]] = prices[i];
         }
         currentMarketStatus = MarketStatus.NONE;
+        _mintableTokenIds = mintableTokenIds;
+    }
+
+    function mintableCountOfOwner(address owner) public view returns (uint8) {
+        if (balanceOf(owner) == 0) return 0;
+
+        uint256 mintableLen = _mintableTokenIds.length;
+        uint8 count = 0;
+        for (uint256 i = 0; i < mintableLen; i++) {
+            if (!_exists(_mintableTokenIds[i])) break;
+            if (ownerOf(_mintableTokenIds[i]) == owner) {
+                count++;
+            }
+        }
+        return count;
     }
 
     /**
@@ -116,6 +134,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
             currentMarketStatus != MarketStatus.NONE,
             "Market is not opened yet"
         );
+        require(totalSupply() <= MAX_TOTAL_SUPPLY, "Market cap reached");
         if (currentMarketStatus == MarketStatus.PRESALE) {
             mintAtPresale(1);
         } else {
