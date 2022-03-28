@@ -11,12 +11,11 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
 
     Counters.Counter private _currentTokenIds;
 
-    enum MarketStatus {
-        NONE,
-        PRESALE,
-        SALE,
-        GIVEAWAY
-    }
+    uint256 private constant MARKET_STATUS_NONE = 0;
+    uint256 private constant MARKET_STATUS_PRESALE = 1;
+    uint256 private constant MARKET_STATUS_SALE = 2;
+    uint256 private constant MARKET_STATUS_GIVEAWAY = 3;
+    uint256 private constant MARKET_STATUS_CAP = 4;
 
     // Certain NFTs can mint and receive ERC20 Tokens per month
     // MUST be ascending sorted id
@@ -26,10 +25,10 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
     mapping(address => uint8) private _whiteList;
 
     // Mapping from market status to price
-    mapping(MarketStatus => uint256) private _marketPrices;
+    mapping(uint256 => uint256) private _marketPrices;
 
     // Current Market Status (None: Not opened, Presale)
-    MarketStatus public currentMarketStatus;
+    uint256 public currentMarketStatus;
 
     // Current Mint price
     uint256 public currentPrice;
@@ -44,7 +43,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
      * @dev Should initialize with market prices per status
      */
     constructor(
-        MarketStatus[] memory statuses,
+        uint256[] memory statuses,
         uint256[] memory prices,
         uint256[] memory mintableTokenIds,
         string memory _baseTokenUri
@@ -59,7 +58,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
         for (uint8 i = 0; i < statuses.length; i++) {
             _marketPrices[statuses[i]] = prices[i];
         }
-        currentMarketStatus = MarketStatus.NONE;
+        currentMarketStatus = MARKET_STATUS_NONE;
         _mintableTokenIds = mintableTokenIds;
     }
 
@@ -80,10 +79,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
     /**
      * @dev owner can set market status manually
      */
-    function setCurrentMarketStatus(MarketStatus marketStatus)
-        external
-        onlyOwner
-    {
+    function setCurrentMarketStatus(uint256 marketStatus) external onlyOwner {
         _setCurrentMarketStatusWithPrice(marketStatus, 0);
     }
 
@@ -92,7 +88,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
      * owner can manually change status
      */
     function setCurrentMarketStatusWithPrice(
-        MarketStatus marketStatus,
+        uint256 marketStatus,
         uint256 price
     ) external onlyOwner {
         _setCurrentMarketStatusWithPrice(marketStatus, price);
@@ -132,11 +128,15 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
      */
     function mint() public payable {
         require(
-            currentMarketStatus != MarketStatus.NONE,
+            currentMarketStatus != MARKET_STATUS_NONE,
             "Market is not opened yet"
         );
-        require(totalSupply() <= MAX_TOTAL_SUPPLY, "Market cap reached");
-        if (currentMarketStatus == MarketStatus.PRESALE) {
+        require(
+            currentMarketStatus != MARKET_STATUS_CAP,
+            "Market is full of capacity"
+        );
+
+        if (currentMarketStatus == MARKET_STATUS_PRESALE) {
             mintAtPresale(1);
         } else {
             require(msg.value >= currentPrice, "Ether is not enough");
@@ -150,7 +150,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
      */
     function mintAtPresale(uint8 numberOfTokens) public payable {
         require(
-            currentMarketStatus == MarketStatus.PRESALE,
+            currentMarketStatus == MARKET_STATUS_PRESALE,
             "Market is not presale"
         );
         require(_whiteList[_msgSender()] > 0, "You are not allowed");
@@ -194,7 +194,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
      * If the price is 0, then current price is set _marketPrices, which is defined at the constructor
      */
     function _setCurrentMarketStatusWithPrice(
-        MarketStatus marketStatus,
+        uint256 marketStatus,
         uint256 price
     ) internal {
         currentMarketStatus = marketStatus;
@@ -226,21 +226,23 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
      */
     function _stateTransition() internal {
         uint256 ts = totalSupply();
+        if (ts >= MAX_TOTAL_SUPPLY) {
+            currentMarketStatus = MARKET_STATUS_CAP;
+        }
         if (
-            currentMarketStatus == MarketStatus.PRESALE &&
+            currentMarketStatus == MARKET_STATUS_PRESALE &&
             ts >= MAX_PRESALE_SUPPLY
         ) {
-            currentMarketStatus = MarketStatus.SALE;
+            currentMarketStatus = MARKET_STATUS_SALE;
             _setCurrentMarketStatusWithPrice(
                 currentMarketStatus,
                 _marketPrices[currentMarketStatus]
             );
-        }
-        if (
-            currentMarketStatus == MarketStatus.SALE &&
+        } else if (
+            currentMarketStatus == MARKET_STATUS_SALE &&
             ts >= MAX_PRESALE_SUPPLY + MAX_SALE_SUPPLY
         ) {
-            currentMarketStatus = MarketStatus.GIVEAWAY;
+            currentMarketStatus = MARKET_STATUS_GIVEAWAY;
             _setCurrentMarketStatusWithPrice(
                 currentMarketStatus,
                 _marketPrices[currentMarketStatus]
