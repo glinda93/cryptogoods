@@ -1,0 +1,10 @@
+{
+  "presalePrice": "10000000000000000",
+  "salePrice": "20000000000000000",
+  "giveawayPrice": "5000000000000000",
+  "mintableTokenIds": [1, 2, 3, 4],
+  "baseTokenUri": "https://ldvc.com/",
+  "whiteList": [],
+  "whiteListAvailableTokens": 10,
+  "nftMonthlyIncomeLdvc": 20
+}
