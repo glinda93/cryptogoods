@@ -37,7 +37,7 @@ jobs:
       # run the tests
       - run: npm test
       - run: npm run node &
-      - run: npm run deploy
+      # - run: npm run deploy
       - name: Upload coverage
         uses: codecov/codecov-action@v2
         with:
