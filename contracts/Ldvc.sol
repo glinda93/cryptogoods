@@ -24,7 +24,7 @@ contract Ldvc is ERC20 {
     /**
      * @dev certain nft holders can claim token every month
      */
-    function claimToken() public returns (uint256) {
+    function claimToken() external returns (uint256) {
         CryptoGoods cgToken = CryptoGoods(cgNftAddress);
         uint8 mintableTokens = cgToken.mintableCountOfOwner(_msgSender());
         if (mintableTokens == 0) return 0;
