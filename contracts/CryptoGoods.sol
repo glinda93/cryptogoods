@@ -62,7 +62,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
         _mintableTokenIds = mintableTokenIds;
     }
 
-    function mintableCountOfOwner(address owner) public view returns (uint8) {
+    function mintableCountOfOwner(address owner) external view returns (uint8) {
         if (balanceOf(owner) == 0) return 0;
 
         uint256 mintableLen = _mintableTokenIds.length;
@@ -110,7 +110,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
      * @dev whitelist user's current available presale limit
      * This limit is set by `setWhiteList`
      */
-    function getOwnerPresaleAvailableToken() public view returns (uint256) {
+    function getOwnerPresaleAvailableToken() external view returns (uint256) {
         return _whiteList[_msgSender()];
     }
 
@@ -126,7 +126,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
      * if market status is presale, it delegates to mintAtPresale
      * users can mint only one at a time
      */
-    function mint() public payable {
+    function mint() external payable {
         require(
             currentMarketStatus != MARKET_STATUS_NONE,
             "Market is not opened yet"
@@ -181,7 +181,7 @@ contract CryptoGoods is ERC721URIStorage, Ownable {
     /**
      * @dev withdraw balance from contract to me
      */
-    function withdraw() public onlyOwner {
+    function withdraw() external onlyOwner {
         uint256 balance = address(this).balance;
         // solhint-disable-next-line
         bool sent = payable(_msgSender()).send(balance);
